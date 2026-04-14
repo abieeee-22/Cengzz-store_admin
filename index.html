@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NOXA V25 | HYPER PANEL</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Plus+Jakarta+Sans:wght@200;500;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --p: #ff0000; --p-glow: rgba(255, 0, 0, 0.4); --bg: #030303; --card: rgba(15, 15, 15, 0.7); }
+        * { margin:0; padding:0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden; }
+
+        /* --- HYPER ANIMATIONS --- */
+        @keyframes blurIn { from { filter: blur(20px); opacity: 0; transform: scale(1.1); } to { filter: blur(0); opacity: 1; transform: scale(1); } }
+        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes glowPulse { 0% { box-shadow: 0 0 10px var(--p-glow); } 50% { box-shadow: 0 0 30px var(--p-glow); } 100% { box-shadow: 0 0 10px var(--p-glow); } }
+
+        /* --- LOGIN SYSTEM --- */
+        #login-gate { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; flex-direction: column; justify-content: center; align-items: center; animation: blurIn 1.5s ease; }
+        .login-card { background: var(--card); backdrop-filter: blur(20px); padding: 50px 30px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.05); text-align: center; width: 90%; max-width: 400px; animation: slideUp 1s cubic-bezier(0.2, 1, 0.3, 1); }
+        .login-card input { width: 100%; background: rgba(0,0,0,0.5); border: 1px solid #222; padding: 18px; border-radius: 15px; color: #fff; text-align: center; font-family: 'Orbitron'; margin: 25px 0; transition: 0.3s; }
+        .login-card input:focus { border-color: var(--p); box-shadow: 0 0 15px var(--p-glow); outline: none; }
+
+        /* --- WELCOME LAYER --- */
+        #welcome-layer { display: none; position: fixed; inset: 0; background: #000; z-index: 11000; }
+        #welcome-layer video { width: 100%; height: 100%; object-fit: cover; }
+
+        /* --- MAIN DASHBOARD --- */
+        #main-ui { display: none; height: 100vh; overflow-y: auto; scroll-behavior: smooth; }
+        .banner-box { width: 100%; height: 350px; position: relative; overflow: hidden; }
+        .banner-box video { width: 100%; height: 100%; object-fit: cover; transform: scale(1.1); filter: brightness(0.6); }
+        .banner-overlay { position: absolute; inset: 0; background: linear-gradient(to top, var(--bg), transparent); display: flex; flex-direction: column; justify-content: flex-end; padding: 40px; }
+
+        .container { padding: 0 25px 50px; margin-top: -50px; position: relative; z-index: 10; }
+        
+        /* Stats Chips */
+        .stat-grid { display: flex; gap: 15px; margin-bottom: 30px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
+        .stat-chip { background: var(--card); backdrop-filter: blur(15px); padding: 20px 35px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.03); flex: 1; min-width: 160px; transition: 0.4s; }
+        .stat-chip:hover { border-color: var(--p); transform: translateY(-5px); }
+
+        /* Panels */
+        .panel { background: var(--card); backdrop-filter: blur(20px); border-radius: 30px; padding: 30px; border: 1px solid rgba(255,255,255,0.03); margin-bottom: 25px; animation: slideUp 0.8s ease; }
+        .panel h2 { font-family: 'Orbitron'; font-size: 14px; margin-bottom: 20px; color: var(--p); letter-spacing: 2px; }
+
+        input, select, textarea { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid #1a1a1a; color: #fff; padding: 15px; border-radius: 15px; margin-top: 10px; transition: 0.3s; }
+        input:focus { border-color: var(--p); background: rgba(0,0,0,0.5); outline: none; }
+
+        .btn-hyper { width: 100%; padding: 18px; border-radius: 18px; border: none; font-family: 'Orbitron'; font-weight: 900; color: #fff; background: var(--p); cursor: pointer; transition: 0.4s; position: relative; overflow: hidden; }
+        .btn-hyper:active { transform: scale(0.95); }
+        .btn-hyper::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); transform: translateX(-100%); transition: 0.5s; }
+        .btn-hyper:hover::after { transform: translateX(100%); }
+
+        /* Navigation Tab */
+        .nav-bar { display: flex; background: rgba(10,10,10,0.8); backdrop-filter: blur(20px); padding: 10px; border-radius: 20px; margin-bottom: 30px; border: 1px solid #111; position: sticky; top: 20px; z-index: 100; }
+        .tab { flex: 1; padding: 12px; text-align: center; font-size: 10px; font-family: 'Orbitron'; border-radius: 12px; cursor: pointer; transition: 0.3s; color: #444; }
+        .tab.active { background: var(--p); color: #fff; box-shadow: 0 5px 15px var(--p-glow); }
+
+        .t-section { display: none; }
+        .t-section.active { display: block; animation: blurIn 0.6s ease; }
+    </style>
+</head>
+<body onclick="playBGM()">
+
+    <div id="login-gate">
+        <div class="login-card">
+            <h1 style="font-family:'Orbitron'; letter-spacing:5px;">CORE ACCESS</h1>
+            <p style="font-size:10px; opacity:0.4; margin-top:10px;">ENCRYPTED SESSION V25</p>
+            <input type="password" id="entry-pw" placeholder="ENTER KEYCODE" autofocus>
+            <button class="btn-hyper" onclick="attemptLogin()">INITIALIZE</button>
+        </div>
+    </div>
+
+    <div id="welcome-layer">
+        <video id="vid-welcome" playsinline><source src="welcome.mp4" type="video/mp4"></video>
+    </div>
+
+    <div id="main-ui">
+        <div class="banner-box">
+            <video autoplay muted loop playsinline><source src="banner.mp4" type="video/mp4"></video>
+            <div class="banner-overlay">
+                <p style="color:var(--p); font-family:'Orbitron'; font-size:10px; letter-spacing:10px;">SECURE DASHBOARD</p>
+                <h1 style="font-family:'Orbitron'; font-size:35px; margin-top:5px;">NOXA_HYPER</h1>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="nav-bar">
+                <div class="tab active" onclick="switchTab(event, 'dash')">DASH</div>
+                <div class="tab" onclick="switchTab(event, 'items')">STOCK</div>
+                <div class="tab" onclick="switchTab(event, 'config')">UI</div>
+                <div class="tab" onclick="switchTab(event, 'sec')">SEC</div>
+            </div>
+
+            <div id="tab-dash" class="t-section active">
+                <div class="stat-grid">
+                    <div class="stat-chip">
+                        <p style="font-size:10px; opacity:0.5;">VISITORS</p>
+                        <h2 id="s-visit" style="font-family:'Orbitron'; font-size:28px;">0</h2>
+                    </div>
+                    <div class="stat-chip">
+                        <p style="font-size:10px; opacity:0.5;">SALES</p>
+                        <h2 id="s-sale" style="font-family:'Orbitron'; font-size:28px;">0</h2>
+                    </div>
+                </div>
+                <div class="panel">
+                    <h2>📢 BROADCAST SYSTEM</h2>
+                    <textarea id="set-bc" rows="3" placeholder="Apa pengumuman hari ini, King?"></textarea>
+                    <button class="btn-hyper" style="margin-top:20px;" onclick="save()">PUSH TO STORE</button>
+                </div>
+            </div>
+
+            <div id="tab-items" class="t-section">
+                <div class="panel">
+                    <h2>➕ NEW PRODUCT</h2>
+                    <select id="p-cat"></select>
+                    <input type="text" id="p-name" placeholder="Item Name">
+                    <input type="text" id="p-price" placeholder="Price (ex: 5k)">
+                    <textarea id="p-desc" placeholder="Product details..."></textarea>
+                    <button class="btn-hyper" style="margin-top:20px;" onclick="addItem()">DEPLOY ITEM</button>
+                </div>
+            </div>
+
+            <div id="tab-config" class="t-section">
+                <div class="panel">
+                    <h2>🎨 STORE APPEARANCE</h2>
+                    <div style="margin-top:15px;">
+                        <label style="font-size:10px; color:var(--p);">STORE TITLE</label>
+                        <input type="text" id="set-title">
+                    </div>
+                    <div style="margin-top:15px;">
+                        <label style="font-size:10px; color:var(--p);">PRIMARY COLOR</label>
+                        <input type="color" id="set-color" style="height:60px; padding:5px;">
+                    </div>
+                    <div style="margin-top:15px;">
+                        <label style="font-size:10px; color:var(--p);">SYSTEM STATUS</label>
+                        <select id="set-status">
+                            <option value="ONLINE">ACTIVE</option>
+                            <option value="MAINTENANCE">UNDER MAINTENANCE</option>
+                        </select>
+                    </div>
+                    <button class="btn-hyper" style="margin-top:20px;" onclick="save()">COMMIT CHANGES</button>
+                </div>
+            </div>
+
+            <div id="tab-sec" class="t-section">
+                <div class="panel">
+                    <h2>🔐 CHANGE KEYCODE</h2>
+                    <input type="password" id="old-pw" placeholder="CURRENT KEYCODE">
+                    <input type="password" id="new-pw" placeholder="NEW KEYCODE">
+                    <button class="btn-hyper" style="margin-top:20px;" onclick="changePassword()">UPDATE SECURITY</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = "https://tokopanel171-public27.panelshop.biz.id:4089/api";
+        let db = null;
+        let sessionPw = "";
+
+        async function attemptLogin() {
+            sessionPw = document.getElementById('entry-pw').value;
+            try {
+                const res = await fetch(`${API}/data`);
+                db = await res.json();
+
+                if(sessionPw === db.adminPw) {
+                    const gate = document.getElementById('login-gate');
+                    gate.style.transition = "1s";
+                    gate.style.opacity = "0";
+                    setTimeout(() => gate.style.display = 'none', 1000);
+
+                    const wl = document.getElementById('welcome-layer');
+                    const wv = document.getElementById('vid-welcome');
+                    wl.style.display = 'block';
+                    wv.play();
+                    wv.onended = () => {
+                        wl.style.opacity = "0";
+                        wl.style.transition = "1s";
+                        setTimeout(() => {
+                            wl.style.display = 'none';
+                            document.getElementById('main-ui').style.display = 'block';
+                            render();
+                        }, 1000);
+                    };
+                } else {
+                    alert("ACCESS DENIED!");
+                }
+            } catch(e) { alert("SERVER OFFLINE!"); }
+        }
+
+        function render() {
+            document.getElementById('s-visit').innerText = db.stats.visitors;
+            document.getElementById('s-sale').innerText = db.stats.sales;
+            document.getElementById('set-title').value = db.config.title;
+            document.getElementById('set-color').value = db.config.primaryColor;
+            document.getElementById('set-status').value = db.config.statusWeb;
+            document.getElementById('set-bc').value = db.config.broadcast;
+
+            const pcat = document.getElementById('p-cat');
+            pcat.innerHTML = "";
+            for(let c in db.categories) pcat.innerHTML += `<option value="${c}">${c}</option>`;
+        }
+
+        function switchTab(e, n) {
+            document.querySelectorAll('.t-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-'+n).classList.add('active');
+            e.target.classList.add('active');
+        }
+
+        async function save() {
+            db.config.title = document.getElementById('set-title').value;
+            db.config.primaryColor = document.getElementById('set-color').value;
+            db.config.statusWeb = document.getElementById('set-status').value;
+            db.config.broadcast = document.getElementById('set-bc').value;
+
+            const res = await fetch(`${API}/update`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ newData: db, pw: sessionPw })
+            });
+            const out = await res.json();
+            alert(out.message);
+        }
+
+        async function changePassword() {
+            const oldPw = document.getElementById('old-pw').value;
+            const newPw = document.getElementById('new-pw').value;
+            const res = await fetch(`${API}/change-pw`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ oldPw, newPw })
+            });
+            const out = await res.json();
+            if(out.success) { alert("PW UPDATED!"); location.reload(); }
+            else { alert(out.msg); }
+        }
+
+        async function addItem() {
+            const cat = document.getElementById('p-cat').value;
+            db.categories[cat].push({
+                n: document.getElementById('p-name').value,
+                p: document.getElementById('p-price').value,
+                d: document.getElementById('p-desc').value,
+                s: true, i: "fa-bolt"
+            });
+            save();
+        }
+    </script>
+</body>
+</html>
